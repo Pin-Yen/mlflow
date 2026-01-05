@@ -66,10 +66,17 @@ class _CaptureImportedModules:
 
                 if fromlist:
                     for from_name in fromlist:
-                        full_modules = parent_modules + [from_name]
-                        full_module_name = ".".join(full_modules)
-                        if full_module_name in sys.modules:
-                            self._record_imported_module(full_module_name)
+                        # If from_name is a submodule, the full module name of the imported module
+                        # should include from_name.
+                        # Otherwise if from_name is just a class or function, the full module name
+                        # should not include from_name.
+                        full_module_name_with_from_name = ".".join(parent_modules + [from_name])
+                        full_module_name_without_from_name = ".".join(parent_modules)
+
+                        if full_module_name_with_from_name in sys.modules:
+                            self._record_imported_module(full_module_name_with_from_name)
+                        elif full_module_name_without_from_name in sys.modules:
+                            self._record_imported_module(full_module_name_without_from_name)
                 else:
                     full_module_name = ".".join(parent_modules)
                     self._record_imported_module(full_module_name)
